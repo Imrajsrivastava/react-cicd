@@ -30,7 +30,6 @@
 #         run: docker run -d -p 3000:80 --name reactContainer raj9140614485/reactjs-app   
 
 
-
 name: CICD
 
 on:
