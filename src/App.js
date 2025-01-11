@@ -15,7 +15,7 @@ function App() {
           target="_blank"
           rel="noopener noreferrer"
         >
-          Learn React
+        first docker react app ci ci pipeline test
         </a>
       </header>
     </div>
