@@ -75,7 +75,7 @@ jobs:
 
       # Step 3: Run the new container
       - name: Run New Container
-        run: docker run -d -p 3000:80 --name reactContainer raj9140614485/reactjs-app:latest
+        run: docker run -d -p 80:80 --name reactContainer raj9140614485/reactjs-app:latest
 
       # Step 4: Verify the container is running
       - name: Check Container Status
