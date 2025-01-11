@@ -84,7 +84,7 @@ jobs:
       # Step 5: Optional - Add a health check (custom script or curl)
       - name: Health Check
         run: |
-          until curl -s http://localhost:3000; do
+          until curl -s http://localhost; do
             echo "Waiting for container to be healthy..."
             sleep 5
           done
