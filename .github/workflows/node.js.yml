@@ -1,3 +1,36 @@
+# name: CICD
+
+# on:
+#   push:
+#     branches:
+#       - main
+
+# jobs:
+#   build:
+#     runs-on: self-hosted
+#     steps:
+#       - name: Checkout Source
+#         uses: actions/checkout@v3
+#       - name: Login to Docker Hub
+#         run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASS }}
+#       - name: Build Docker Image
+#         run: docker build -t raj9140614485/reactjs-app .
+#       - name: Publish image to docker hub
+#         run: docker push raj9140614485/reactjs-app:latest   
+
+#   deploy: 
+#     needs: build
+#     runs-on: self-hosted    
+#     steps:
+#       - name: Pull image from docker hub
+#         run: docker pull raj9140614485/reactjs-app:latest 
+#       - name: Delete Old Container
+#         run: docker rm -f reactContainer
+#       - name: Run docker container
+#         run: docker run -d -p 3000:80 --name reactContainer raj9140614485/reactjs-app   
+
+
+
 name: CICD
 
 on:
@@ -9,22 +42,51 @@ jobs:
   build:
     runs-on: self-hosted
     steps:
+      # Step 1: Checkout the repository
       - name: Checkout Source
         uses: actions/checkout@v3
+
+      # Step 2: Log in to Docker Hub
       - name: Login to Docker Hub
         run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASS }}
-      - name: Build Docker Image
-        run: docker build -t raj9140614485/reactjs-app .
-      - name: Publish image to docker hub
-        run: docker push raj9140614485/reactjs-app:latest   
 
-  deploy: 
+      # Step 3: Build the Docker image with BuildKit enabled
+      - name: Build Docker Image
+        env:
+          DOCKER_BUILDKIT: 1
+        run: docker build -t raj9140614485/reactjs-app:latest .
+
+      # Step 4: Push the image to Docker Hub
+      - name: Publish Image to Docker Hub
+        run: docker push raj9140614485/reactjs-app:latest
+
+  deploy:
     needs: build
-    runs-on: self-hosted    
+    runs-on: self-hosted
     steps:
-      - name: Pull image from docker hub
-        run: docker pull raj9140614485/reactjs-app:latest 
-      - name: Delete Old Container
-        run: docker rm -f reactContainer
-      - name: Run docker container
-        run: docker run -d -p 3000:80 --name reactContainer raj9140614485/reactjs-app   
+      # Step 1: Pull the latest Docker image from Docker Hub
+      - name: Pull Image from Docker Hub
+        run: docker pull raj9140614485/reactjs-app:latest
+
+      # Step 2: Stop and remove the old container (if exists)
+      - name: Stop and Remove Old Container
+        run: |
+          docker ps -q --filter "name=reactContainer" | xargs -r docker stop
+          docker ps -aq --filter "name=reactContainer" | xargs -r docker rm
+
+      # Step 3: Run the new container
+      - name: Run New Container
+        run: docker run -d -p 3000:80 --name reactContainer raj9140614485/reactjs-app:latest
+
+      # Step 4: Verify the container is running
+      - name: Check Container Status
+        run: docker ps --filter "name=reactContainer"
+
+      # Step 5: Optional - Add a health check (custom script or curl)
+      - name: Health Check
+        run: |
+          until curl -s http://localhost:3000; do
+            echo "Waiting for container to be healthy..."
+            sleep 5
+          done
+          echo "Container is up and running."

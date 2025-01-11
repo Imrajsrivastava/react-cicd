@@ -1,8 +1,13 @@
 
 # Step 1: Build React App
-FROM node:alpine3.18 as build
+FROM node:18-slim as build
 WORKDIR /app
-COPY package.json* .
+# Copy only package.json and lock file for dependency installation
+COPY package.json package-lock.json* ./
+
+# Set NODE_OPTIONS to increase memory limit
+ENV NODE_OPTIONS="--max-old-space-size=2048"
+
 RUN npm install
 COPY . .
 RUN npm run build
